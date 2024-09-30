@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:taxi_users/authentication/signup_screen.dart';
 import 'package:taxi_users/methods/common_methods.dart';
-import 'dart:io';
 import 'package:taxi_users/widgets/loading_dialog.dart'; // Assuming you have a loading dialog
 
 import '../pages/home_page.dart';
@@ -42,17 +43,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Check if the phone number length matches the required length for the selected country code
     if (phoneTextEditingController.text.length != phoneNumberLength) {
-      cMethods.displaySnackBar("Please enter a valid phone number of length $phoneNumberLength", context);
+      cMethods.displaySnackBar(
+          "Please enter a valid phone number of length $phoneNumberLength",
+          context);
       return;
     }
 
-    String fullPhoneNumber = selectedCountryCode + phoneTextEditingController.text;
+    String fullPhoneNumber =
+        selectedCountryCode + phoneTextEditingController.text;
 
     // Display a loading dialog while sending OTP
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) => LoadingDialog(messageText: "Sending OTP..."),
+      builder: (BuildContext context) =>
+          LoadingDialog(messageText: "Sending OTP..."),
     );
 
     // Send OTP to phone number
@@ -61,10 +66,12 @@ class _LoginScreenState extends State<LoginScreen> {
         phoneNumber: fullPhoneNumber,
         timeout: const Duration(seconds: 60),
         verificationCompleted: (PhoneAuthCredential credential) async {
-          Navigator.pop(context); // Close the loading dialog if verification is completed automatically
+          Navigator.pop(
+              context); // Close the loading dialog if verification is completed automatically
           // Auto-retrieval or instant verification on Android devices
           await _auth.signInWithCredential(credential);
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const HomePage()));
         },
         verificationFailed: (FirebaseAuthException e) {
           Navigator.pop(context); // Close the loading dialog
@@ -77,8 +84,12 @@ class _LoginScreenState extends State<LoginScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => OtpVerificationScreen(
-                verificationId: verificationId, // This should be the verification ID from Firebase
-                phoneNumber: fullPhoneNumber, firstName: '', lastName: '', // The phone number in the correct format with country code
+                verificationId:
+                    verificationId, // This should be the verification ID from Firebase
+                phoneNumber: fullPhoneNumber,
+                firstName: '',
+                lastName:
+                    '', // The phone number in the correct format with country code
               ),
             ),
           );
@@ -97,81 +108,81 @@ class _LoginScreenState extends State<LoginScreen> {
       builder: (BuildContext context) {
         return Platform.isIOS
             ? CupertinoAlertDialog(
-          title: const Text('Select Country'),
-          content: SizedBox(
-            height: 200,
-            child: CupertinoPicker(
-              itemExtent: 32.0,
-              onSelectedItemChanged: (int index) {
-                setState(() {
-                  selectedCountryCode = countryList[index]['code']!;
-                  selectedFlag = countryList[index]['flag']!;
-                  switch (countryList[index]['code']) {
-                    case '+225': // Côte d'Ivoire
-                    case '+234': // Nigeria
-                      phoneNumberLength = 10;
-                      break;
-                    case '+226': // Burkina Faso
-                    case '+228': // Togo
-                    case '+229': // Benin
-                      phoneNumberLength = 8;
-                      break;
-                    case '+233': // Ghana
-                      phoneNumberLength = 9;
-                      break;
-                    default:
-                      phoneNumberLength = 8;
-                      break;
-                  }
-                });
-                Navigator.of(context).pop();
-              },
-              children: countryList.map((country) {
-                return Text('${country['flag']} ${country['name']}');
-              }).toList(),
-            ),
-          ),
-        )
+                title: const Text('Select Country'),
+                content: SizedBox(
+                  height: 200,
+                  child: CupertinoPicker(
+                    itemExtent: 32.0,
+                    onSelectedItemChanged: (int index) {
+                      setState(() {
+                        selectedCountryCode = countryList[index]['code']!;
+                        selectedFlag = countryList[index]['flag']!;
+                        switch (countryList[index]['code']) {
+                          case '+225': // Côte d'Ivoire
+                          case '+234': // Nigeria
+                            phoneNumberLength = 10;
+                            break;
+                          case '+226': // Burkina Faso
+                          case '+228': // Togo
+                          case '+229': // Benin
+                            phoneNumberLength = 8;
+                            break;
+                          case '+233': // Ghana
+                            phoneNumberLength = 9;
+                            break;
+                          default:
+                            phoneNumberLength = 8;
+                            break;
+                        }
+                      });
+                      Navigator.of(context).pop();
+                    },
+                    children: countryList.map((country) {
+                      return Text('${country['flag']} ${country['name']}');
+                    }).toList(),
+                  ),
+                ),
+              )
             : AlertDialog(
-          title: const Text('Select Country'),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: countryList.length,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  leading: Text(countryList[index]['flag']!),
-                  title: Text(countryList[index]['name']!),
-                  onTap: () {
-                    setState(() {
-                      selectedCountryCode = countryList[index]['code']!;
-                      selectedFlag = countryList[index]['flag']!;
-                      switch (countryList[index]['code']) {
-                        case '+225': // Côte d'Ivoire
-                        case '+234': // Nigeria
-                          phoneNumberLength = 10;
-                          break;
-                        case '+226': // Burkina Faso
-                        case '+228': // Togo
-                        case '+229': // Benin
-                          phoneNumberLength = 8;
-                          break;
-                        case '+233': // Ghana
-                          phoneNumberLength = 9;
-                          break;
-                        default:
-                          phoneNumberLength = 8;
-                          break;
-                      }
-                    });
-                    Navigator.of(context).pop();
-                  },
-                );
-              },
-            ),
-          ),
-        );
+                title: const Text('Select Country'),
+                content: SizedBox(
+                  width: double.maxFinite,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: countryList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return ListTile(
+                        leading: Text(countryList[index]['flag']!),
+                        title: Text(countryList[index]['name']!),
+                        onTap: () {
+                          setState(() {
+                            selectedCountryCode = countryList[index]['code']!;
+                            selectedFlag = countryList[index]['flag']!;
+                            switch (countryList[index]['code']) {
+                              case '+225': // Côte d'Ivoire
+                              case '+234': // Nigeria
+                                phoneNumberLength = 10;
+                                break;
+                              case '+226': // Burkina Faso
+                              case '+228': // Togo
+                              case '+229': // Benin
+                                phoneNumberLength = 8;
+                                break;
+                              case '+233': // Ghana
+                                phoneNumberLength = 9;
+                                break;
+                              default:
+                                phoneNumberLength = 8;
+                                break;
+                            }
+                          });
+                          Navigator.of(context).pop();
+                        },
+                      );
+                    },
+                  ),
+                ),
+              );
       },
     );
   }
@@ -188,7 +199,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffdb1702), // Vermillion red background color
+      backgroundColor:
+          const Color(0xffdb1702), // Vermillion red background color
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(10),
@@ -210,7 +222,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8.0),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8.0),
@@ -228,9 +241,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                 const SizedBox(width: 8.0),
                                 Text(
                                   selectedCountryCode,
-                                  style: const TextStyle(color: Colors.black, fontSize: 16.0, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.bold),
                                 ),
-                                const Icon(Icons.arrow_drop_down, color: Colors.black),
+                                const Icon(Icons.arrow_drop_down,
+                                    color: Colors.black),
                               ],
                             ),
                           ),
@@ -254,7 +271,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
-                                LengthLimitingTextInputFormatter(phoneNumberLength),
+                                LengthLimitingTextInputFormatter(
+                                    phoneNumberLength),
                               ],
                             ),
                           ),
@@ -268,7 +286,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 50), // Make the button long
+                        minimumSize: const Size(
+                            double.infinity, 50), // Make the button long
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -286,7 +305,8 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 12),
               TextButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (c) => const SignUpScreen()));
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (c) => const SignUpScreen()));
                 },
                 child: RichText(
                   text: const TextSpan(
@@ -298,7 +318,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextSpan(
                         text: 'Register Here',
                         style: TextStyle(
-                          color: Colors.yellow, // Make the "Register Here" text yellow
+                          color: Colors
+                              .yellow, // Make the "Register Here" text yellow
                           fontWeight: FontWeight.bold,
                         ),
                       ),
