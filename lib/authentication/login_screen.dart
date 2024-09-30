@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:taxi_users/authentication/signup_screen.dart';
 import 'package:taxi_users/methods/common_methods.dart';
 import 'dart:io';
+import 'package:taxi_users/widgets/loading_dialog.dart'; // Assuming you have a loading dialog
+
+import '../pages/home_page.dart';
+import 'otp_verification_screen.dart'; // Assuming you have an OTP verification screen
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,6 +24,8 @@ class _LoginScreenState extends State<LoginScreen> {
   int phoneNumberLength = 10; // Default length for Côte d'Ivoire
   CommonMethods cMethods = CommonMethods();
 
+  final FirebaseAuth _auth = FirebaseAuth.instance; // Firebase Auth instance
+
   Future<void> checkIfNetworksAvailable() async {
     bool isConnected = await cMethods.checkConnectivity(context);
     if (isConnected) {
@@ -26,12 +33,62 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void loginFormValidation() {
+  Future<void> loginFormValidation() async {
+    // Check if the phone number field is empty
     if (phoneTextEditingController.text.isEmpty) {
       cMethods.displaySnackBar("Please enter your Phone Number", context);
       return;
     }
-    // Proceed with login logic
+
+    // Check if the phone number length matches the required length for the selected country code
+    if (phoneTextEditingController.text.length != phoneNumberLength) {
+      cMethods.displaySnackBar("Please enter a valid phone number of length $phoneNumberLength", context);
+      return;
+    }
+
+    String fullPhoneNumber = selectedCountryCode + phoneTextEditingController.text;
+
+    // Display a loading dialog while sending OTP
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => LoadingDialog(messageText: "Sending OTP..."),
+    );
+
+    // Send OTP to phone number
+    try {
+      await _auth.verifyPhoneNumber(
+        phoneNumber: fullPhoneNumber,
+        timeout: const Duration(seconds: 60),
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          Navigator.pop(context); // Close the loading dialog if verification is completed automatically
+          // Auto-retrieval or instant verification on Android devices
+          await _auth.signInWithCredential(credential);
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          Navigator.pop(context); // Close the loading dialog
+          cMethods.displaySnackBar(e.message.toString(), context);
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          Navigator.pop(context); // Close the loading dialog
+          // Navigate to OTP verification screen
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OtpVerificationScreen(
+                verificationId: verificationId, // This should be the verification ID from Firebase
+                phoneNumber: fullPhoneNumber, firstName: '', lastName: '', // The phone number in the correct format with country code
+              ),
+            ),
+          );
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {},
+      );
+    } catch (e) {
+      Navigator.pop(context); // Close the loading dialog
+      cMethods.displaySnackBar("An error occurred: $e", context);
+    }
   }
 
   void _showCountryPickerDialog() {
@@ -208,7 +265,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ElevatedButton(
                       onPressed: () {
                         checkIfNetworksAvailable();
-                        // Handle login action here
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,

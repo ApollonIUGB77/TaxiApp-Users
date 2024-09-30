@@ -1,3 +1,17 @@
+buildscript{
+    ext.kotlin8version = '1.7.10'
+    repositories{
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin8version"
+        classpath 'com.google.gms:google-services:4.3.15'
+    }
+
+}
+
+
 allprojects {
     repositories {
         google()
@@ -16,13 +30,6 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
-
-
-/*dependencies{
-    implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
-    //implementation 'com.google.firebase:firebase-analytics'
-}*/
-
 
 
 

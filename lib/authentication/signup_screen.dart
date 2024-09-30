@@ -7,8 +7,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:taxi_users/authentication/login_screen.dart';
 import 'package:taxi_users/methods/common_methods.dart';
-import 'package:taxi_users/methods/pages/home_page.dart';
 import 'package:taxi_users/widgets/loading_dialog.dart';
+import '../pages/home_page.dart';
 import 'otp_verification_screen.dart';
 
 class SignUpScreen extends StatefulWidget {

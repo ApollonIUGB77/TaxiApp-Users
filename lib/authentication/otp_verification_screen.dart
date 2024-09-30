@@ -5,7 +5,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/services.dart';
 import 'package:taxi_users/methods/common_methods.dart';
 import 'package:taxi_users/widgets/loading_dialog.dart';
-import 'package:taxi_users/methods/pages/home_page.dart';
+
+
+import '../pages/home_page.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String verificationId;
