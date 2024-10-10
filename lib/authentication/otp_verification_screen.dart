@@ -104,6 +104,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       return;
     }
 
+    if (!_canVerify) {
+      cMethods.displaySnackBar("Please wait before trying again.", context);
+      return;
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -122,7 +127,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       UserCredential userCredential =
           await auth.signInWithCredential(credential);
       Navigator.pop(context);
-      handleSignIn(userCredential.user);
+      await handleSignIn(userCredential.user);
     } catch (e) {
       Navigator.pop(context);
       setState(() {
@@ -163,7 +168,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     }
   }
 
-  void handleSignIn(User? user) {
+  Future<void> handleSignIn(User? user) async {
     if (user != null) {
       DatabaseReference usersRef =
           FirebaseDatabase.instance.ref().child("users").child(user.uid);
@@ -174,11 +179,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         "id": user.uid,
         "blockStatus": "no",
       };
-      usersRef.set(userDataMap);
+      await usersRef.set(userDataMap);
+
+      // Navigate to HomePage
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (c) => const HomePage()),
       );
+    } else {
+      cMethods.displaySnackBar("User not found.", context);
     }
   }
 
@@ -191,9 +200,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         FocusScope.of(context)
             .unfocus(); // Close the keyboard if it's the last field
       }
-    } else {
-      // If the field is empty and user pressed backspace, move to previous
-      // This will be handled in the Focus widget's onKey callback
     }
   }
 
@@ -339,7 +345,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                                             focusNodes[index]);
                                                   },
                                                   onSubmitted: (value) {
-                                                    if (index == 5) {
+                                                    if (index == 5 &&
+                                                        isOtpComplete) {
                                                       verifyOtp();
                                                     }
                                                   },
@@ -401,15 +408,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                                     Navigator.pop(
                                                         context); // Close the dialog
                                                     // Instant verification or auto-retrieval on Android devices
-                                                    await auth
-                                                        .signInWithCredential(
-                                                            credential);
-                                                    Navigator.pushReplacement(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              const HomePage()),
-                                                    );
+                                                    UserCredential
+                                                        userCredential =
+                                                        await auth
+                                                            .signInWithCredential(
+                                                                credential);
+                                                    await handleSignIn(
+                                                        userCredential.user);
                                                   },
                                                   verificationFailed:
                                                       (FirebaseAuthException
