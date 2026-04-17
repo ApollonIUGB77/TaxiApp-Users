@@ -1,16 +1,5 @@
-/*
-
-  String userName = "";
-
-  String googleMapKey = "AIzaSyDCKIksWnSkItVv1wt8w4wOAJ3tTKQAmO0";
-
-  const CameraPosition googlePlexInitialPosition = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
-  );
-
-*/
+// © 2026 Aboubacar Sidick Meite (ApollonIUGB77) — All Rights Reserved
+// ⚠️  Replace with your own Google Maps API key — never commit real keys to git.
 class GlobalVar {
-  static const String googleMapsApiKey =
-      'AIzaSyDCKIksWnSkItVv1wt8w4wOAJ3tTKQAmO0';
+  static const String googleMapsApiKey = 'YOUR_GOOGLE_MAPS_API_KEY';
 }
